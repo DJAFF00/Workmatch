@@ -40,6 +40,7 @@ export function JobCard({ job }: { job: PublicJob }) {
       </div>
       <h3 className="mt-6 text-xl font-extrabold">{job.title}</h3>
       <div className="mt-3 flex flex-wrap gap-1.5 text-xs font-semibold">
+        {job.featured && <span className="rounded-full bg-orange px-3 py-1 text-white">★ À la une</span>}
         {[contractLabels[job.contract], workModeLabels[job.workMode], job.sector].map((t, i) => (
           <span key={t} className={`rounded-full px-3 py-1 ${i === 0 ? "bg-orange-soft text-orange-deep" : "bg-white text-muted ring-1 ring-line"}`}>{t}</span>
         ))}

@@ -9,7 +9,7 @@ import { logoSrc } from "@/lib/logo";
 
 export type PublicJob = {
   slug: string; title: string; contract: string; workMode: string; location: string;
-  publishedAt: string; company: string; companySlug: string; sector: string; logo: string | null;
+  publishedAt: string; company: string; companySlug: string; sector: string; logo: string | null; featured: boolean;
 };
 
 export type JobDetail = {
@@ -32,10 +32,12 @@ const listColumns = {
   slug: jobs.slug, title: jobs.title, contract: jobs.contract, workMode: jobs.workMode,
   location: jobs.location, publishedAt: jobs.publishedAt,
   company: companies.name, companySlug: companies.slug, sector: companies.sector, logoPath: companies.logoUrl,
+  // Les offres des entreprises au plan Pro (actif) sont mises en avant.
+  featured: sql<boolean>`(${companies.plan} = 'PRO' and (${companies.planUntil} is null or ${companies.planUntil} > now()))`,
 };
 
 function toPublic({ logoPath, ...r }: { publishedAt: Date | null; logoPath: string | null } & Omit<PublicJob, "publishedAt" | "logo">): PublicJob {
-  return { ...r, publishedAt: (r.publishedAt ?? new Date(0)).toISOString(), logo: logoSrc(r.companySlug, logoPath) };
+  return { ...r, featured: Boolean(r.featured), publishedAt: (r.publishedAt ?? new Date(0)).toISOString(), logo: logoSrc(r.companySlug, logoPath) };
 }
 
 export async function getPublishedJobs(limit: number): Promise<PublicJob[]> {
@@ -44,7 +46,7 @@ export async function getPublishedJobs(limit: number): Promise<PublicJob[]> {
   cacheLife("minutes");
 
   const rows = await db.select(listColumns).from(jobs).innerJoin(companies, eq(jobs.companyId, companies.id))
-    .where(live).orderBy(desc(jobs.publishedAt)).limit(limit);
+    .where(live).orderBy(desc(listColumns.featured), desc(jobs.publishedAt)).limit(limit);
   return rows.map(toPublic);
 }
 
@@ -87,7 +89,7 @@ export async function getCompany(slug: string): Promise<CompanyProfile | null> {
   if (!c) return null;
 
   const rows = await db.select(listColumns).from(jobs).innerJoin(companies, eq(jobs.companyId, companies.id))
-    .where(and(live, eq(jobs.companyId, c.id))).orderBy(desc(jobs.publishedAt));
+    .where(and(live, eq(jobs.companyId, c.id))).orderBy(desc(listColumns.featured), desc(jobs.publishedAt));
 
   return { name: c.name, slug: c.slug, sector: c.sector, size: c.size, city: c.city, website: c.website, description: c.description, logo: logoSrc(c.slug, c.logoUrl), jobs: rows.map(toPublic) };
 }

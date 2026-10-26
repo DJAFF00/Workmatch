@@ -44,9 +44,12 @@ export default async function AbonnementPage() {
               <h2 className="text-xl font-extrabold">{p.name}</h2>
               {p.id === current && <span className="rounded-full bg-orange px-3 py-1 text-xs font-bold text-white">Votre plan</span>}
             </div>
-            <p className="mt-2 text-2xl font-extrabold">{p.price ?? "Tarif bientôt annoncé"}</p>
+            <p className="mt-2 text-2xl font-extrabold">{p.price} <span className="text-sm font-semibold text-muted">{p.period}</span></p>
             <ul className="mt-4 space-y-2 text-sm text-muted">
-              {p.features.map((f) => <li key={f} className="flex gap-3"><span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-orange" />{f}</li>)}
+              {p.features.map((f) => (
+                <li key={f.text} className="flex gap-3"><span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-orange" />
+                  <span>{f.text}{f.soon && <span className="ml-2 rounded-full bg-orange-soft px-2 py-0.5 text-[10px] font-bold text-orange-deep">Bientôt</span>}</span></li>
+              ))}
             </ul>
           </section>
         ))}

@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { JobsSkeleton } from "@/components/job-card";
 import { LatestJobs } from "@/components/latest-jobs";
 import { Pricing } from "@/components/pricing";
+import { Reveal } from "@/components/reveal";
 import { SearchForm } from "@/components/search-form";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -48,6 +49,7 @@ function Steps({ items }: { items: string[][] }) {
 export default function Home() {
   return (
     <>
+      <noscript><style>{".reveal{opacity:1!important;transform:none!important}"}</style></noscript>
       <SiteHeader active="accueil" />
 
       <main>
@@ -84,6 +86,7 @@ export default function Home() {
 
           <div className="rise rise-3 relative mx-auto w-full max-w-[640px] lg:max-w-none">
             <div aria-hidden className="absolute inset-[8%] -z-10 rounded-full bg-orange/25 blur-3xl" />
+            <div className="float-y">
             <Image
               src="/hero.webp"
               alt="Tableau de bord de recrutement : liste de candidats, fiche profil, statistiques et calendrier d’entretiens"
@@ -93,6 +96,7 @@ export default function Home() {
               sizes="(min-width: 1024px) 640px, 100vw"
               className="h-auto w-full drop-shadow-[0_30px_40px_rgba(15,23,42,.16)]"
             />
+            </div>
           </div>
         </section>
 
@@ -102,17 +106,21 @@ export default function Home() {
         </Suspense>
 
         <section id="fonctionnement" className="mx-auto mt-32 grid max-w-6xl gap-8 px-5 md:grid-cols-2">
-          <div className="glass rounded-[2rem] p-8 sm:p-10">
+          <Reveal className="h-full">
+          <div className="glass h-full rounded-[2rem] p-8 sm:p-10">
             <h2 className="text-3xl font-extrabold sm:text-4xl">Vous cherchez un emploi</h2>
             <Steps items={candidateSteps} />
           </div>
-          <div className="glass rounded-[2rem] p-8 sm:p-10">
+          </Reveal>
+          <Reveal delay={130} className="h-full">
+          <div className="glass h-full rounded-[2rem] p-8 sm:p-10">
             <h2 className="text-3xl font-extrabold sm:text-4xl">Vous recrutez</h2>
             <Steps items={companySteps} />
           </div>
+          </Reveal>
         </section>
 
-        <section className="mx-auto mt-24 max-w-6xl px-5">
+        <Reveal><section className="mx-auto mt-24 max-w-6xl px-5">
           <h2 className="text-2xl font-extrabold">Parcourir par secteur</h2>
           <ul className="mt-5 flex flex-wrap gap-2.5">
             {sectorOptions.map((s) => (
@@ -123,9 +131,9 @@ export default function Home() {
               </li>
             ))}
           </ul>
-        </section>
+        </section></Reveal>
 
-        <section id="entreprises" className="mx-auto mt-32 max-w-6xl px-5">
+        <Reveal><section id="entreprises" className="mx-auto mt-32 max-w-6xl px-5">
           <div className="relative overflow-hidden rounded-[2.25rem] bg-ink p-8 text-white sm:p-14">
             <div aria-hidden className="absolute -right-24 -top-24 size-96 rounded-full bg-orange/40 blur-3xl" />
             <div className="relative grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
@@ -154,11 +162,11 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </section>
+        </section></Reveal>
 
         <Pricing />
 
-        <section className="mx-auto mt-32 max-w-3xl px-5">
+        <Reveal><section className="mx-auto mt-32 max-w-3xl px-5">
           <h2 className="text-3xl font-extrabold sm:text-5xl">Questions fréquentes</h2>
           <div className="mt-10 space-y-3">
             {faq.map(([q, a]) => (
@@ -171,7 +179,7 @@ export default function Home() {
               </details>
             ))}
           </div>
-        </section>
+        </section></Reveal>
       </main>
 
       <SiteFooter />
