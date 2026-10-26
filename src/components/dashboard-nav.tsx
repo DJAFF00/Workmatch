@@ -8,6 +8,8 @@ const items = [
   ["/dashboard/offres", "Offres"],
   ["/dashboard/candidatures", "Candidatures"],
   ["/dashboard/entretiens", "Entretiens"],
+  ["/dashboard/statistiques", "Statistiques"],
+  ["/dashboard/abonnement", "Abonnement"],
   ["/dashboard/parametres", "Paramètres"],
 ];
 

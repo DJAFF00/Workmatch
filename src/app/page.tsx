@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Suspense } from "react";
 import { JobsSkeleton } from "@/components/job-card";
 import { LatestJobs } from "@/components/latest-jobs";
+import { Pricing } from "@/components/pricing";
 import { SearchForm } from "@/components/search-form";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -23,7 +24,7 @@ const companySteps = [
 const stats = [["2 min", "pour postuler"], ["0", "compte à créer"], ["1", "tableau de bord"], ["100%", "gratuit candidats"]];
 const faq = [
   ["Dois-je créer un compte pour postuler ?", "Non. Vous remplissez le formulaire de l’offre, joignez vos documents et envoyez. Les réponses arrivent sur votre adresse email."],
-  ["Publier une offre est-il payant ?", "Les tarifs seront annoncés prochainement. La création du compte entreprise est gratuite."],
+  ["Publier une offre est-il payant ?", "Un plan gratuit permet de publier 2 offres en même temps, avec des candidatures illimitées. Le plan Pro, pour publier sans limite, sera bientôt disponible."],
   ["Mes documents sont-ils protégés ?", "Seule l’entreprise à laquelle vous postulez peut consulter votre candidature. Vous pouvez demander sa suppression à tout moment."],
   ["Comment l’entreprise me contacte-t-elle ?", "Par email, depuis son espace WorkMatch. Pour un entretien, vous recevez la date, l’heure et l’intitulé du poste."],
 ];
@@ -154,6 +155,8 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <Pricing />
 
         <section className="mx-auto mt-32 max-w-3xl px-5">
           <h2 className="text-3xl font-extrabold sm:text-5xl">Questions fréquentes</h2>

@@ -12,6 +12,7 @@ export function SiteHeader({ active }: { active?: "accueil" | "offres" }) {
         <Link href="/offres" className={link(active === "offres")}>Offres</Link>
         <Link href="/#fonctionnement" className={link(false)}>Comment ça marche</Link>
         <Link href="/#entreprises" className={link(false)}>Entreprises</Link>
+        <Link href="/#tarifs" className={link(false)}>Tarifs</Link>
       </nav>
       <div className="flex items-center gap-3 text-sm font-semibold">
         <Link href="/connexion" className="hidden px-2 py-2 sm:block">Connexion</Link>

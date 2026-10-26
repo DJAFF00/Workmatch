@@ -6,6 +6,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
 import { contractType, jobStatus, jobs, workMode } from "@/db/schema";
+import { publishLimitError } from "@/lib/plan-limits";
 import { requireCompany } from "@/lib/session";
 import { slugify } from "@/lib/utils";
 import type { JobFormState } from "@/lib/form-state";
@@ -112,6 +113,10 @@ export async function saveJob(_: JobFormState, fd: FormData): Promise<JobFormSta
     if (!existing) return fail("Offre introuvable.");
 
     const status = intent === "publish" ? "PUBLIEE" : intent === "draft" ? "BROUILLON" : existing.status;
+    if (status === "PUBLIEE" && existing.status !== "PUBLIEE") {
+      const limit = await publishLimitError(company, id);
+      if (limit) return fail(limit);
+    }
     await db.update(jobs).set({
       ...values,
       status,
@@ -119,6 +124,10 @@ export async function saveJob(_: JobFormState, fd: FormData): Promise<JobFormSta
     }).where(and(eq(jobs.id, id), eq(jobs.companyId, company.id)));
   } else {
     const status = intent === "publish" ? "PUBLIEE" : "BROUILLON";
+    if (status === "PUBLIEE") {
+      const limit = await publishLimitError(company);
+      if (limit) return fail(limit);
+    }
     const slug = `${slugify(d.title).slice(0, 60)}-${Math.random().toString(36).slice(2, 7)}`;
     await db.insert(jobs).values({
       ...values,
@@ -141,6 +150,12 @@ export async function setJobStatus(fd: FormData) {
   const id = idSchema.safeParse(str(fd, "id"));
   const status = z.enum(jobStatus.enumValues).safeParse(str(fd, "status"));
   if (!id.success || !status.success) return;
+
+  if (status.data === "PUBLIEE") {
+    const [cur] = await db.select({ status: jobs.status }).from(jobs).where(and(eq(jobs.id, id.data), eq(jobs.companyId, company.id))).limit(1);
+    if (!cur) return;
+    if (cur.status !== "PUBLIEE" && (await publishLimitError(company, id.data))) redirect("/dashboard/offres?limite=1");
+  }
 
   await db.update(jobs).set({
     status: status.data,

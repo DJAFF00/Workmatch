@@ -3,6 +3,7 @@ import { count, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { applications, jobs } from "@/db/schema";
 import { requireCompany } from "@/lib/session";
+import { effectivePlan, plans } from "@/lib/plans";
 import { contractLabels, statusLabels, workModeLabels } from "@/lib/constants";
 import { duplicateJob, deleteJob, setJobStatus } from "@/lib/job-actions";
 import { ConfirmButton } from "@/components/confirm-button";
@@ -30,8 +31,10 @@ function StatusButton({ id, to, children }: { id: string; to: string; children: 
   );
 }
 
-export default async function OffresPage() {
+export default async function OffresPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { company } = await requireCompany();
+  const limite = Boolean((await searchParams).limite);
+  const plan = plans[effectivePlan(company.plan, company.planUntil)];
   const rows = await db
     .select({ job: jobs, apps: count(applications.id) })
     .from(jobs)
@@ -41,10 +44,21 @@ export default async function OffresPage() {
     .orderBy(desc(jobs.createdAt));
 
   const fmt = new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" });
+  const activeCount = rows.filter((r) => r.job.status === "PUBLIEE").length;
 
   return (
     <>
       <PageHeader title="Vos offres" subtitle="Créez, publiez et suivez vos offres d’emploi." action={{ href: "/dashboard/offres/nouvelle", label: "Nouvelle offre" }} />
+      {limite && (
+        <p role="alert" className="mt-6 rounded-2xl bg-orange-soft px-5 py-4 text-sm font-semibold text-orange-deep">
+          Vous avez atteint la limite d’offres publiées de votre plan. Clôturez une offre ou <Link href="/dashboard/abonnement" className="underline">passez au plan Pro</Link>.
+        </p>
+      )}
+      {plan.maxActiveJobs != null && (
+        <p className="mt-3 text-sm text-muted">
+          Plan {plan.name} : <strong className="text-ink">{activeCount}</strong> sur {plan.maxActiveJobs} offres publiées. <Link href="/dashboard/abonnement" className="font-semibold text-orange">Gérer mon abonnement</Link>
+        </p>
+      )}
 
       {rows.length === 0 ? (
         <EmptyState title="Aucune offre pour l’instant" text="Cliquez sur « Nouvelle offre » pour publier votre premier poste." />

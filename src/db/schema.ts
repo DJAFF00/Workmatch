@@ -29,6 +29,8 @@ export const companies = pgTable("companies", {
   logoUrl: text("logo_url"),
   city: text("city"),
   country: text("country"),
+  plan: text("plan").notNull().default("GRATUIT"), // GRATUIT | PRO
+  planUntil: timestamp("plan_until"), // fin du plan Pro (vide = sans limite de durée)
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
