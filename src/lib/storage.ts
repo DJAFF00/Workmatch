@@ -52,3 +52,22 @@ export async function removeFiles(pathnames: string[]) {
     // nettoyage au mieux
   }
 }
+
+// ---------- Logos (images uniquement, 1 Mo maximum) ----------
+export const MAX_LOGO_BYTES = 1024 * 1024;
+const imageTypes = { png: "image/png", jpg: "image/jpeg", webp: "image/webp" } as const;
+export type ImageKind = keyof typeof imageTypes;
+
+export async function checkImage(file: File): Promise<{ kind: ImageKind; data: Buffer } | null> {
+  const data = Buffer.from(await file.arrayBuffer());
+  const is = (...n: number[]) => n.every((v, i) => data[i] === v);
+  const kind: ImageKind | null = is(0x89, 0x50, 0x4e, 0x47) ? "png" : is(0xff, 0xd8, 0xff) ? "jpg"
+    : is(0x52, 0x49, 0x46, 0x46) && data.subarray(8, 12).toString() === "WEBP" ? "webp" : null;
+  return kind ? { kind, data } : null;
+}
+
+export async function uploadLogo(img: { kind: ImageKind; data: Buffer }, companyId: string) {
+  const pathname = `logos/${companyId}/${crypto.randomUUID()}.${img.kind}`;
+  await put(pathname, img.data, { access: "private", contentType: imageTypes[img.kind], addRandomSuffix: false });
+  return pathname;
+}

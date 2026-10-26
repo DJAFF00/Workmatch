@@ -104,7 +104,7 @@ async function Offre({ params }: { params: Params }) {
 
       <article className="glass rounded-[2rem] p-6 sm:p-10">
         <div className="flex items-center gap-4">
-          <CompanyLogo name={job.company.name} size="size-14 text-xl rounded-2xl" />
+          <CompanyLogo name={job.company.name} logo={job.company.logo} size="size-14 text-xl rounded-2xl" />
           <div>
             <Link href={`/entreprises/${job.company.slug}`} className="font-bold hover:text-orange">{job.company.name}</Link>
             <p className="text-sm text-muted">{job.company.sector}</p>

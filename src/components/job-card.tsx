@@ -14,7 +14,15 @@ export function companyTint(name: string) {
   return tints[sum % tints.length];
 }
 
-export function CompanyLogo({ name, size = "size-12 text-lg rounded-2xl" }: { name: string; size?: string }) {
+export function CompanyLogo({ name, logo, size = "size-12 text-lg rounded-2xl" }: { name: string; logo?: string | null; size?: string }) {
+  if (logo) {
+    return (
+      <span className={`grid shrink-0 place-items-center overflow-hidden bg-white ring-1 ring-line ${size}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={logo} alt={`Logo ${name}`} className="size-full object-contain p-1.5" />
+      </span>
+    );
+  }
   const [bg, fg] = companyTint(name);
   return <span className={`grid shrink-0 place-items-center font-extrabold ${size}`} style={{ background: bg, color: fg }}>{name[0]?.toUpperCase()}</span>;
 }
@@ -23,7 +31,7 @@ export function JobCard({ job }: { job: PublicJob }) {
   return (
     <Link href={`/offres/${job.slug}`} className="glass group flex h-full flex-col rounded-3xl p-6 transition hover:-translate-y-1 hover:shadow-[0_24px_50px_-16px_rgba(255,90,15,.35)]">
       <div className="flex items-center gap-3">
-        <CompanyLogo name={job.company} />
+        <CompanyLogo name={job.company} logo={job.logo} />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-bold">{job.company}</p>
           <p className="truncate text-xs text-muted">{job.location}</p>

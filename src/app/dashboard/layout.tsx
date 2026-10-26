@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import { DashboardNav } from "@/components/dashboard-nav";
+import { CompanyLogo } from "@/components/job-card";
 import { Logo } from "@/components/logo";
+import { logoSrc } from "@/lib/logo";
 import { logout } from "@/lib/actions";
 import { requireCompany } from "@/lib/session";
 
@@ -23,7 +25,7 @@ async function Shell({ children }: { children: React.ReactNode }) {
         <Logo />
         <DashboardNav />
         <div className="mt-auto flex items-center gap-3 border-t border-line pt-4 max-lg:hidden">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-orange-soft font-extrabold text-orange-deep">{company.name[0]}</span>
+          <CompanyLogo name={company.name} logo={logoSrc(company.slug, company.logoUrl)} size="size-10 rounded-xl" />
           <div className="min-w-0">
             <p className="truncate text-sm font-bold">{company.name}</p>
             <p className="truncate text-xs text-muted">{user.email}</p>

@@ -2,13 +2,14 @@ import { cacheLife, cacheTag } from "next/cache";
 import { and, desc, eq, gte, isNull, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { companies, jobs } from "@/db/schema";
+import { logoSrc } from "@/lib/logo";
 
 // Toutes les lectures publiques sont mises en cache quelques minutes (tag "jobs").
 // Le dashboard invalide ce cache dès qu'une offre change (voir job-actions.ts).
 
 export type PublicJob = {
   slug: string; title: string; contract: string; workMode: string; location: string;
-  publishedAt: string; company: string; companySlug: string; sector: string;
+  publishedAt: string; company: string; companySlug: string; sector: string; logo: string | null;
 };
 
 export type JobDetail = {
@@ -17,12 +18,12 @@ export type JobDetail = {
   contract: string; workMode: string; location: string; experienceLevel: string | null;
   salaryMin: number | null; salaryMax: number | null; salaryCurrency: string | null;
   deadline: string | null; publishedAt: string; expired: boolean;
-  company: { name: string; slug: string; sector: string; size: string | null; city: string | null; website: string | null; description: string | null };
+  company: { name: string; slug: string; sector: string; size: string | null; city: string | null; website: string | null; description: string | null; logo: string | null };
 };
 
 export type CompanyProfile = {
   name: string; slug: string; sector: string; size: string | null; city: string | null;
-  website: string | null; description: string | null; jobs: PublicJob[];
+  website: string | null; description: string | null; logo: string | null; jobs: PublicJob[];
 };
 
 const live = and(eq(jobs.status, "PUBLIEE"), or(isNull(jobs.deadline), gte(jobs.deadline, sql`now()`)));
@@ -30,11 +31,11 @@ const live = and(eq(jobs.status, "PUBLIEE"), or(isNull(jobs.deadline), gte(jobs.
 const listColumns = {
   slug: jobs.slug, title: jobs.title, contract: jobs.contract, workMode: jobs.workMode,
   location: jobs.location, publishedAt: jobs.publishedAt,
-  company: companies.name, companySlug: companies.slug, sector: companies.sector,
+  company: companies.name, companySlug: companies.slug, sector: companies.sector, logoPath: companies.logoUrl,
 };
 
-function toPublic(r: { publishedAt: Date | null } & Omit<PublicJob, "publishedAt">): PublicJob {
-  return { ...r, publishedAt: (r.publishedAt ?? new Date(0)).toISOString() };
+function toPublic({ logoPath, ...r }: { publishedAt: Date | null; logoPath: string | null } & Omit<PublicJob, "publishedAt" | "logo">): PublicJob {
+  return { ...r, publishedAt: (r.publishedAt ?? new Date(0)).toISOString(), logo: logoSrc(r.companySlug, logoPath) };
 }
 
 export async function getPublishedJobs(limit: number): Promise<PublicJob[]> {
@@ -58,7 +59,7 @@ export async function getJob(slug: string): Promise<JobDetail | null> {
       expired: sql<boolean>`(${jobs.deadline} is not null and ${jobs.deadline} < now())`,
       company: {
         name: companies.name, slug: companies.slug, sector: companies.sector, size: companies.size,
-        city: companies.city, website: companies.website, description: companies.description,
+        city: companies.city, website: companies.website, description: companies.description, logoPath: companies.logoUrl,
       },
     })
     .from(jobs).innerJoin(companies, eq(jobs.companyId, companies.id))
@@ -73,7 +74,7 @@ export async function getJob(slug: string): Promise<JobDetail | null> {
     deadline: j.deadline ? j.deadline.toISOString() : null,
     publishedAt: (j.publishedAt ?? j.createdAt).toISOString(),
     expired: Boolean(r.expired),
-    company: r.company,
+    company: { name: r.company.name, slug: r.company.slug, sector: r.company.sector, size: r.company.size, city: r.company.city, website: r.company.website, description: r.company.description, logo: logoSrc(r.company.slug, r.company.logoPath) },
   };
 }
 
@@ -88,5 +89,5 @@ export async function getCompany(slug: string): Promise<CompanyProfile | null> {
   const rows = await db.select(listColumns).from(jobs).innerJoin(companies, eq(jobs.companyId, companies.id))
     .where(and(live, eq(jobs.companyId, c.id))).orderBy(desc(jobs.publishedAt));
 
-  return { name: c.name, slug: c.slug, sector: c.sector, size: c.size, city: c.city, website: c.website, description: c.description, jobs: rows.map(toPublic) };
+  return { name: c.name, slug: c.slug, sector: c.sector, size: c.size, city: c.city, website: c.website, description: c.description, logo: logoSrc(c.slug, c.logoUrl), jobs: rows.map(toPublic) };
 }

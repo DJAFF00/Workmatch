@@ -46,7 +46,7 @@ async function Content({ params }: { params: Params }) {
     <>
       <Link href={`/offres/${job.slug}`} className="text-sm font-semibold text-muted hover:text-orange">← Retour à l’offre</Link>
       <div className="mt-6 flex items-center gap-4">
-        <CompanyLogo name={job.company.name} size="size-14 text-xl rounded-2xl" />
+        <CompanyLogo name={job.company.name} logo={job.company.logo} size="size-14 text-xl rounded-2xl" />
         <div>
           <h1 className="text-2xl font-extrabold sm:text-4xl">Postuler : {job.title}</h1>
           <p className="text-sm text-muted">{job.company.name} · {contractLabels[job.contract]} · {workModeLabels[job.workMode]} · {job.location}</p>
