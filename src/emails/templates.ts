@@ -76,3 +76,13 @@ export function buildIcs(p: { id: string; start: Date; title: string; location?:
     "END:VEVENT", "END:VCALENDAR",
   ].join("\r\n");
 }
+
+export function passwordReset(p: { name: string; url: string }) {
+  return {
+    subject: "Réinitialisez votre mot de passe WorkMatch",
+    html: layout(`<h1 style="font-size:22px;margin:0 0 12px">Bonjour ${esc(p.name)},</h1>
+<p>Vous avez demandé à réinitialiser le mot de passe de votre compte WorkMatch. Cliquez sur le bouton ci-dessous pour en choisir un nouveau.</p>
+${button(p.url, "Choisir un nouveau mot de passe")}
+<p style="margin:24px 0 0;color:#64748b;font-size:13px">Ce lien est valable 1 heure. Si vous n’êtes pas à l’origine de cette demande, ignorez cet email : votre mot de passe ne sera pas modifié.</p>`),
+  };
+}
