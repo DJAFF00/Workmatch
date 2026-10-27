@@ -71,3 +71,8 @@ export async function uploadLogo(img: { kind: ImageKind; data: Buffer }, company
   await put(pathname, img.data, { access: "private", contentType: imageTypes[img.kind], addRandomSuffix: false });
   return pathname;
 }
+
+// Suppression stricte (compte supprimé) : si un fichier ne peut pas être effacé, on le signale au lieu de l'ignorer.
+export async function deleteFilesStrict(pathnames: string[]) {
+  for (let i = 0; i < pathnames.length; i += 100) await del(pathnames.slice(i, i + 100));
+}
